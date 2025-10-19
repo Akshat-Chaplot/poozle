@@ -39,6 +39,7 @@ public:
   virtual bool analyze(
       const std::string &pattern,
       std::vector<size_t> &results) = 0; /**< Perform analysis on the buffer */
+  virtual int count(const std::string &pattern) = 0;
 
 protected:
   PzCoreSPtr core_; /** Shared pointer to core data */
@@ -56,6 +57,7 @@ public:
       : PzAnalysisImpl(core) {} //** Constructor */
   bool analyze(const std::string &pattern,
                std::vector<size_t> &results) override;
+  int count(const std::string &pattern) override;
 };
 
 /**
@@ -67,6 +69,7 @@ public:
       : PzAnalysisImpl(core) {} //** Constructor */
   bool analyze(const std::string &pattern,
                std::vector<size_t> &results) override;
+  int count(const std::string & pattern) override;
 };
 
 /**
@@ -100,6 +103,7 @@ public:
       PzAnalysisType type, const std::string &pattern,
       std::vector<size_t> &results); /** Perform analysis of the given pattern
                                         using the specified analysis type. */
+  int count(PzAnalysisType type, const std::string &pattern);
 
   friend class PzCore;
 };

@@ -107,6 +107,7 @@ bool PzBuffer::load_text(std::string_view text, bool needs_build) {
   // need to convert string_view to string for std::istringstream processing
   std::istringstream iss{std::string(text)};
   std::string word;
+  this->text = text;
   while (iss >> word) {
     load_word(word, false);
   }
@@ -133,6 +134,10 @@ bool PzBuffer::load_words(const std::vector<std::string> &words) {
   for (const auto &w : words) {
     total_characters_ += w.size();
   }
+  for (const auto &w : words) {
+    text =  text + w;
+    text = text + "\0";
+  }
   apply_storage_flag();
   return true;
 }
@@ -156,6 +161,10 @@ bool PzBuffer::load_words(std::vector<std::string> &&words) {
     total_characters_ += word.size();
     words_.push_back(std::move(word));
   }
+  for (std::string &word : words) {
+    text.append(std::move(word));
+    text = text + "\0";
+  }
   apply_storage_flag();
   return true;
 }
@@ -176,6 +185,7 @@ bool PzBuffer::load_from_file(const std::string &filename) {
   // Read file line-by-line and tokenize
   while (std::getline(file, line)) {
     load_text(line, false);
+    text = text + line;
   }
   apply_storage_flag();
   return true;
@@ -227,7 +237,9 @@ bool PzBuffer::load_from_file_chunked(const std::string &filename,
     }
 
     load_text(combined_chunk, false);
+    text = text + combined_chunk;
   }
+  text = text + carry_over;
 
   // After the loop, process any remaining content in carry_over
   if (!carry_over.empty()) {

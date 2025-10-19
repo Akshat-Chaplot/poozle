@@ -2,6 +2,8 @@
 #include <pz_core.hpp>
 #include <pz_error.hpp>
 #include <pz_std.hpp>
+#include <pz_buffer.hpp>
+#include <FMIndex.hpp>
 using PzBufferSPtr = std::shared_ptr<PzStd::PzBuffer>;
 namespace PzStd {
 
@@ -31,6 +33,26 @@ bool PzAnalysisExact::analyze(const std::string &pattern,
   } catch (const std::exception &e) {
     PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
                           "Exact analysis failed: " + std::string(e.what()));
+    return false;
+  }
+}
+
+int PzAnalysisExact::count(const std::string &pattern) {
+  PzBufferSPtr buffer = core_ ? core_->pz_buffer_sptr : nullptr;
+
+  if (buffer == nullptr || pattern.empty()) {
+    PzError::report_error(PzErrorType::PZ_INVALID_INPUT,
+                          "Invalid buffer or empty pattern");
+    return false;
+  }
+
+  try {
+    FMIndex fm = buffer->fm_index;
+    fm.count(pattern, pattern.size());
+    return true;
+  } catch (const std::exception &e) {
+    PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
+                          "Exact count failed: " + std::string(e.what()));
     return false;
   }
 }
@@ -120,6 +142,32 @@ bool PzAnalysis::performAnalysis(PzAnalysisType type,
   } catch (const std::exception &e) {
     PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
                           "Analysis failed: " + std::string(e.what()));
+    return false;
+  }
+}
+
+int PzAnalysis::count(PzAnalysisType type,
+                                 const std::string &pattern) {
+  try {
+    if (impl_ == nullptr || curr_type_ != type) {
+      switch (type) {
+      case PzAnalysisType::PZ_ANALYSIS_TYPE_EXACT:
+        impl_ = std::make_unique<PzAnalysisExact>(core_);
+        break;
+      case PzAnalysisType::PZ_ANALYSIS_TYPE_REGEX:
+        impl_ = std::make_unique<PzAnalysisRegex>(core_);
+        break;
+      default:
+        PzError::report_error(PzErrorType::PZ_INVALID_ANALYSIS_TYPE,
+                              "Unknown analysis type");
+        return false;
+      }
+      curr_type_ = type;
+    }
+    return impl_->count(pattern);
+  } catch (const std::exception &e) {
+    PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
+                          "Counting failed: " + std::string(e.what()));
     return false;
   }
 }

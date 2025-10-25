@@ -13,7 +13,7 @@ using namespace std::chrono;
 const char us = 0;
 const int N = 150;
 
-void count_sort(vector<int>& p, vector<int>& c){
+static void count_sort(vector<int>& p, vector<int>& c){
     int n = p.size();
     vector<int> cnt(n), pos(n);
     for(auto x : c){
@@ -32,7 +32,7 @@ void count_sort(vector<int>& p, vector<int>& c){
     p = p_new;
 }
 
-vector<int> suffix_array(string& s){
+static vector<int> suffix_array(string& s){
     s+=us;
     int len = s.length();
     vector<int> p(len), c(len);

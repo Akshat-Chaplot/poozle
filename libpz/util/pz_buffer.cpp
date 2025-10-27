@@ -135,7 +135,7 @@ bool PzBuffer::load_words(const std::vector<std::string> &words) {
     total_characters_ += w.size();
   }
   for (const auto &w : words) {
-    text =  text + w;
+    text = text + w;
     text = text + "\0";
   }
   apply_storage_flag();

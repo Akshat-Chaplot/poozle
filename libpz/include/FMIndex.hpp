@@ -8,6 +8,7 @@ const int ALPHABET_SIZE = 150;
 
 class FMIndex {
 public:
+  FMIndex() {}
   FMIndex(std::string &text, int text_length, int rank_interval,
           int sample_interval);
   int count(const std::string &pattern, int m);

@@ -1,9 +1,9 @@
+#include <FMIndex.hpp>
 #include <pz_analysis.hpp>
+#include <pz_buffer.hpp>
 #include <pz_core.hpp>
 #include <pz_error.hpp>
 #include <pz_std.hpp>
-#include <pz_buffer.hpp>
-#include <FMIndex.hpp>
 using PzBufferSPtr = std::shared_ptr<PzStd::PzBuffer>;
 namespace PzStd {
 
@@ -146,8 +146,7 @@ bool PzAnalysis::performAnalysis(PzAnalysisType type,
   }
 }
 
-int PzAnalysis::count(PzAnalysisType type,
-                                 const std::string &pattern) {
+int PzAnalysis::count(PzAnalysisType type, const std::string &pattern) {
   try {
     if (impl_ == nullptr || curr_type_ != type) {
       switch (type) {

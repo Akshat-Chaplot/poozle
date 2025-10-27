@@ -69,7 +69,7 @@ public:
       : PzAnalysisImpl(core) {} //** Constructor */
   bool analyze(const std::string &pattern,
                std::vector<size_t> &results) override;
-  int count(const std::string & pattern) override;
+  int count(const std::string &pattern) override;
 };
 
 /**

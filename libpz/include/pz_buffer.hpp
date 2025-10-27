@@ -1,11 +1,11 @@
 #ifndef PZ_BUFFER_HPP
 #define PZ_BUFFER_HPP
 
+#include <FMIndex.hpp>
 #include <pz_cxx_std.hpp>
 #include <pz_error.hpp>
 #include <pz_std.hpp>
 #include <pz_types.hpp>
-#include <FMIndex.hpp>
 
 /** @brief namespace PzStd */
 namespace PzStd {

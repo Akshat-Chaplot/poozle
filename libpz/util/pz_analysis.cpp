@@ -189,7 +189,8 @@ int PzAnalysis::count(PzAnalysisType type, const std::string &pattern) {
   }
 }
 
-std::vector<int> PzAnalysis::locate(PzAnalysisType type, const std::string &pattern) {
+std::vector<int> PzAnalysis::locate(PzAnalysisType type,
+                                    const std::string &pattern) {
   try {
     if (impl_ == nullptr || curr_type_ != type) {
       switch (type) {

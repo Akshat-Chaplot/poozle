@@ -50,38 +50,38 @@ static std::vector<int> build_suffix_array(const std::string &input) {
   return order;
 }
 
-FMIndex::FMIndex(const std::string& word){
-    for(auto c : word){
-        text = text + get_position(c);
-    }
-    text = text + RESERVED_SYMBOLS["EOB"];
+FMIndex::FMIndex(const std::string &word) {
+  for (auto c : word) {
+    text = text + get_position(c);
+  }
+  text = text + RESERVED_SYMBOLS["EOB"];
 }
 
-FMIndex::FMIndex(std::string_view text){
-    for(auto c : text){
-        this->text = this->text + get_position(c);
-    }
-    this->text = this->text + RESERVED_SYMBOLS["EOB"];
+FMIndex::FMIndex(std::string_view text) {
+  for (auto c : text) {
+    this->text = this->text + get_position(c);
+  }
+  this->text = this->text + RESERVED_SYMBOLS["EOB"];
 }
 
-FMIndex::FMIndex(const std::vector<std::string>& words){
-    for(auto word : words){
-        for(auto c : word){
-            text = text + get_position(c);
-        }
-        text = text + RESERVED_SYMBOLS["CONCATNATION"];
+FMIndex::FMIndex(const std::vector<std::string> &words) {
+  for (auto word : words) {
+    for (auto c : word) {
+      text = text + get_position(c);
     }
-    text = text + RESERVED_SYMBOLS["EOB"];
+    text = text + RESERVED_SYMBOLS["CONCATNATION"];
+  }
+  text = text + RESERVED_SYMBOLS["EOB"];
 }
 
-FMIndex::FMIndex(std::vector<std::string> &&words){
-    for(auto word : words){
-        for(auto c : word){
-            text = text + get_position(c);
-        }
-        text = text + RESERVED_SYMBOLS["CONCATNATION"];
+FMIndex::FMIndex(std::vector<std::string> &&words) {
+  for (auto word : words) {
+    for (auto c : word) {
+      text = text + get_position(c);
     }
-    text = text + RESERVED_SYMBOLS["EOB"];
+    text = text + RESERVED_SYMBOLS["CONCATNATION"];
+  }
+  text = text + RESERVED_SYMBOLS["EOB"];
 }
 
 FMIndex::FMIndex(std::string &text, int text_length, int rank_interval,

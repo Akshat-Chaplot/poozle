@@ -1,15 +1,15 @@
 #ifndef FMINDEX_HPP
 #define FMINDEX_HPP
 
-#include <pz_cxx_std.hpp>
 #include <Alphabet.hpp>
+#include <pz_cxx_std.hpp>
 
 class FMIndex {
 public:
   FMIndex() {}
   FMIndex(const std::string &word);
   FMIndex(std::string_view text);
-  FMIndex(const std::vector<std::string>& words);
+  FMIndex(const std::vector<std::string> &words);
   FMIndex(std::vector<std::string> &&words);
   FMIndex(std::string &text, int text_length, int rank_interval,
           int sample_interval);

@@ -4,10 +4,8 @@
 #include <pz_cxx_std.hpp>
 #include <pz_types.hpp>
 
-std::map<std::string, char> RESERVED_SYMBOLS = {
-  {"EOB", 0},
-  {"CONCATNATION", 1}
-};
+std::map<std::string, char> RESERVED_SYMBOLS = {{"EOB", 0},
+                                                {"CONCATNATION", 1}};
 
 extern const int ALPHABET_SIZE;
 

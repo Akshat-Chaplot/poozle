@@ -50,21 +50,39 @@ static std::vector<int> build_suffix_array(const std::string &input) {
   return order;
 }
 
+int FMIndex::calculate_rank_interval(int text_length) {
+  int num = 32 * ALPHABET_SIZE;
+  int den = 1000000000 - (40 * ALPHABET_SIZE);
+  if (den <= 0) {
+    return 80;
+  }
+  int res = num / den;
+  if (res == 0) {
+    return 1;
+  }
+  return res;
+}
+
 FMIndex::FMIndex(const std::string &word) {
+  std::string text;
   for (auto c : word) {
     text = text + get_position(c);
   }
   text = text + RESERVED_SYMBOLS["EOB"];
+  pre_build(text, (int)text.size(), calculate_rank_interval(text.size()), 1);
 }
 
-FMIndex::FMIndex(std::string_view text) {
-  for (auto c : text) {
-    this->text = this->text + get_position(c);
+FMIndex::FMIndex(std::string_view text_view) {
+  std::string text;
+  for (auto c : text_view) {
+    text = text + get_position(c);
   }
-  this->text = this->text + RESERVED_SYMBOLS["EOB"];
+  text = text + RESERVED_SYMBOLS["EOB"];
+  pre_build(text, (int)text.size(), calculate_rank_interval(text.size()), 1);
 }
 
 FMIndex::FMIndex(const std::vector<std::string> &words) {
+  std::string text;
   for (auto word : words) {
     for (auto c : word) {
       text = text + get_position(c);
@@ -72,9 +90,11 @@ FMIndex::FMIndex(const std::vector<std::string> &words) {
     text = text + RESERVED_SYMBOLS["CONCATNATION"];
   }
   text = text + RESERVED_SYMBOLS["EOB"];
+  pre_build(text, (int)text.size(), calculate_rank_interval(text.size()), 1);
 }
 
 FMIndex::FMIndex(std::vector<std::string> &&words) {
+  std::string text;
   for (auto word : words) {
     for (auto c : word) {
       text = text + get_position(c);
@@ -82,11 +102,11 @@ FMIndex::FMIndex(std::vector<std::string> &&words) {
     text = text + RESERVED_SYMBOLS["CONCATNATION"];
   }
   text = text + RESERVED_SYMBOLS["EOB"];
+  pre_build(text, (int)text.size(), calculate_rank_interval(text.size()), 1);
 }
 
-FMIndex::FMIndex(std::string &text, int text_length, int rank_interval,
-                 int sample_interval) {
-  this->text_length = text_length;
+void FMIndex::pre_build(const std::string &text, int text_length,
+                        int rank_interval, int sample_interval) {
   this->rank_interval = rank_interval;
   this->sample_interval = std::max(1, sample_interval);
   int n = text_length;
@@ -123,11 +143,16 @@ FMIndex::FMIndex(std::string &text, int text_length, int rank_interval,
   int occ_rows = n / rank_interval + 1;
   Occ.assign(occ_rows, std::vector<int>(ALPHABET_SIZE, 0));
   C.assign(ALPHABET_SIZE + 1, 0);
-  build(text, text_length, rank_interval, this->sample_interval);
+  build(text, text_length);
 }
 
-void FMIndex::build(const std::string &text, int text_length, int rank_interval,
-                    int sample_interval) {
+FMIndex::FMIndex(std::string &text, int text_length, int rank_interval,
+                 int sample_interval) {
+  pre_build(text, text_length, rank_interval, sample_interval);
+  build(text, text_length);
+}
+
+void FMIndex::build(const std::string &text, int text_length) {
   int n = text_length;
 
   std::vector<int> freq(ALPHABET_SIZE, 0);
@@ -161,8 +186,8 @@ void FMIndex::build(const std::string &text, int text_length, int rank_interval,
 int FMIndex::rank(unsigned char ch, int pos) {
   if (pos <= 0)
     return 0;
-  if (pos > text_length)
-    pos = text_length;
+  if (pos > L.length())
+    pos = L.length();
 
   int idx = pos / rank_interval;
   if (idx >= (int)Occ.size())
@@ -183,7 +208,7 @@ int FMIndex::count(const std::string &pattern, int m) {
     return 0;
 
   unsigned char ch = get_position(static_cast<unsigned char>(pattern[m - 1]));
-  if (get_position(ch) >= ALPHABET_SIZE)
+  if (ch >= ALPHABET_SIZE)
     return 0;
   int s = C[ch];
   int e = C[ch + 1] - 1;
@@ -238,12 +263,12 @@ std::vector<int> FMIndex::locate(const std::string &pattern) {
       pos = LF(pos, c);
       ++steps;
 
-      if (steps > text_length)
+      if (steps > L.length())
         break;
     }
 
     if (SA_sample[pos] != -1) {
-      int start = (SA_sample[pos] + steps) % text_length;
+      int start = (SA_sample[pos] + steps) % L.length();
       results.push_back(start);
     }
   }

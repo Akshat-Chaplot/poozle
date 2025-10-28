@@ -2,19 +2,22 @@
 #define FMINDEX_HPP
 
 #include <pz_cxx_std.hpp>
-
-const char SENTINEL_CHAR = 0;
-const int ALPHABET_SIZE = 150;
+#include <Alphabet.hpp>
 
 class FMIndex {
 public:
   FMIndex() {}
+  FMIndex(const std::string &word);
+  FMIndex(std::string_view text);
+  FMIndex(const std::vector<std::string>& words);
+  FMIndex(std::vector<std::string> &&words);
   FMIndex(std::string &text, int text_length, int rank_interval,
           int sample_interval);
   int count(const std::string &pattern, int m);
   std::vector<int> locate(const std::string &pattern);
 
 private:
+  std::string text;
   std::string L;
   std::vector<std::vector<int>> Occ;
   std::vector<int> C;

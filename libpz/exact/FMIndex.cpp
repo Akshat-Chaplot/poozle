@@ -2,7 +2,6 @@
 
 static std::vector<int> build_suffix_array(const std::string &input) {
   std::string text = input;
-  text.push_back(SENTINEL_CHAR);
   int len = (int)text.size();
   std::vector<int> order(len), cls(len);
   std::vector<std::pair<char, int>> a(len);
@@ -49,6 +48,40 @@ static std::vector<int> build_suffix_array(const std::string &input) {
     k++;
   }
   return order;
+}
+
+FMIndex::FMIndex(const std::string& word){
+    for(auto c : word){
+        text = text + get_position(c);
+    }
+    text = text + RESERVED_SYMBOLS["EOB"];
+}
+
+FMIndex::FMIndex(std::string_view text){
+    for(auto c : text){
+        this->text = this->text + get_position(c);
+    }
+    this->text = this->text + RESERVED_SYMBOLS["EOB"];
+}
+
+FMIndex::FMIndex(const std::vector<std::string>& words){
+    for(auto word : words){
+        for(auto c : word){
+            text = text + get_position(c);
+        }
+        text = text + RESERVED_SYMBOLS["CONCATNATION"];
+    }
+    text = text + RESERVED_SYMBOLS["EOB"];
+}
+
+FMIndex::FMIndex(std::vector<std::string> &&words){
+    for(auto word : words){
+        for(auto c : word){
+            text = text + get_position(c);
+        }
+        text = text + RESERVED_SYMBOLS["CONCATNATION"];
+    }
+    text = text + RESERVED_SYMBOLS["EOB"];
 }
 
 FMIndex::FMIndex(std::string &text, int text_length, int rank_interval,
@@ -149,15 +182,15 @@ int FMIndex::count(const std::string &pattern, int m) {
   if (m == 0)
     return 0;
 
-  unsigned char ch = static_cast<unsigned char>(pattern[m - 1]);
-  if (ch >= ALPHABET_SIZE)
+  unsigned char ch = get_position(static_cast<unsigned char>(pattern[m - 1]));
+  if (get_position(ch) >= ALPHABET_SIZE)
     return 0;
   int s = C[ch];
   int e = C[ch + 1] - 1;
 
   int i = m - 2;
   while (s <= e && i >= 0) {
-    ch = static_cast<unsigned char>(pattern[i]);
+    ch = get_position(static_cast<unsigned char>(pattern[i]));
     if (ch >= ALPHABET_SIZE)
       return 0;
 
@@ -177,14 +210,14 @@ std::vector<int> FMIndex::locate(const std::string &pattern) {
   if (m == 0)
     return results;
 
-  unsigned char ch = static_cast<unsigned char>(pattern[m - 1]);
+  unsigned char ch = get_position(static_cast<unsigned char>(pattern[m - 1]));
   if (ch >= ALPHABET_SIZE)
     return results;
   int s = C[ch];
   int e = C[ch + 1] - 1;
 
   for (int i = m - 2; i >= 0 && s <= e; --i) {
-    ch = static_cast<unsigned char>(pattern[i]);
+    ch = get_position(static_cast<unsigned char>(pattern[i]));
     if (ch >= ALPHABET_SIZE)
       return results;
     s = C[ch] + rank(ch, s);
@@ -199,7 +232,7 @@ std::vector<int> FMIndex::locate(const std::string &pattern) {
     int steps = 0;
 
     while (SA_sample[pos] == -1) {
-      unsigned char c = static_cast<unsigned char>(L[pos]);
+      unsigned char c = get_position(static_cast<unsigned char>(L[pos]));
       if (c >= ALPHABET_SIZE)
         break;
       pos = LF(pos, c);

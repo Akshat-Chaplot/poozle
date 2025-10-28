@@ -43,17 +43,35 @@ int PzAnalysisExact::count(const std::string &pattern) {
   if (buffer == nullptr || pattern.empty()) {
     PzError::report_error(PzErrorType::PZ_INVALID_INPUT,
                           "Invalid buffer or empty pattern");
-    return false;
+    return {};
   }
 
   try {
     FMIndex fm = buffer->fm_index;
-    fm.count(pattern, pattern.size());
-    return true;
+    return fm.count(pattern, pattern.size());
   } catch (const std::exception &e) {
     PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
                           "Exact count failed: " + std::string(e.what()));
-    return false;
+    return -1;
+  }
+}
+
+std::vector<int> PzAnalysisExact::locate(const std::string &pattern) {
+  PzBufferSPtr buffer = core_ ? core_->pz_buffer_sptr : nullptr;
+
+  if (buffer == nullptr || pattern.empty()) {
+    PzError::report_error(PzErrorType::PZ_INVALID_INPUT,
+                          "Invalid buffer or empty pattern");
+    return {};
+  }
+
+  try {
+    FMIndex fm = buffer->fm_index;
+    return fm.locate(pattern);
+  } catch (const std::exception &e) {
+    PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
+                          "Exact count failed: " + std::string(e.what()));
+    return {};
   }
 }
 
@@ -159,7 +177,7 @@ int PzAnalysis::count(PzAnalysisType type, const std::string &pattern) {
       default:
         PzError::report_error(PzErrorType::PZ_INVALID_ANALYSIS_TYPE,
                               "Unknown analysis type");
-        return false;
+        return -1;
       }
       curr_type_ = type;
     }
@@ -167,7 +185,32 @@ int PzAnalysis::count(PzAnalysisType type, const std::string &pattern) {
   } catch (const std::exception &e) {
     PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
                           "Counting failed: " + std::string(e.what()));
-    return false;
+    return -1;
+  }
+}
+
+std::vector<int> PzAnalysis::locate(PzAnalysisType type, const std::string &pattern) {
+  try {
+    if (impl_ == nullptr || curr_type_ != type) {
+      switch (type) {
+      case PzAnalysisType::PZ_ANALYSIS_TYPE_EXACT:
+        impl_ = std::make_unique<PzAnalysisExact>(core_);
+        break;
+      case PzAnalysisType::PZ_ANALYSIS_TYPE_REGEX:
+        impl_ = std::make_unique<PzAnalysisRegex>(core_);
+        break;
+      default:
+        PzError::report_error(PzErrorType::PZ_INVALID_ANALYSIS_TYPE,
+                              "Unknown analysis type");
+        return {};
+      }
+      curr_type_ = type;
+    }
+    return impl_->locate(pattern);
+  } catch (const std::exception &e) {
+    PzError::report_error(PzErrorType::PZ_ANALYSIS_FAILED,
+                          "Locating failed: " + std::string(e.what()));
+    return {};
   }
 }
 
